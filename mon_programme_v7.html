@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mon Programme">
+<title>Mon Programme</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0f0f0f;--bg2:#1a1a1a;--bg3:#242424;--border:#2e2e2e;--text:#f0f0f0;--muted:#888;--green:#1D9E75;--purple:#7F77DD;--coral:#D85A30;--amber:#BA7517;--blue:#378ADD;--red:#E24B4A}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;min-height:100vh;padding-bottom:88px}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 16px 10px;position:sticky;top:0;z-index:10}
+.header-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.app-title{font-size:17px;font-weight:700;color:var(--text)}
+.today-badge{font-size:11px;padding:3px 10px;border-radius:20px;background:var(--green);color:#fff;font-weight:600}
+.header-sub{font-size:12px;color:var(--muted)}
+.subnav{display:flex;gap:0;background:var(--bg2);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+.subnav::-webkit-scrollbar{display:none}
+.snav-btn{padding:10px 14px;font-size:12px;font-weight:600;color:var(--muted);border:none;background:transparent;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;flex-shrink:0}
+.snav-btn.on{color:var(--text);border-bottom:2px solid var(--green)}
+.page{display:none;padding:14px}.page.on{display:block}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:10px}
+.tag{display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.03em}
+.tag-green{background:rgba(29,158,117,0.15);color:var(--green)}
+.tag-purple{background:rgba(127,119,221,0.15);color:var(--purple)}
+.tag-coral{background:rgba(216,90,48,0.15);color:var(--coral)}
+.tag-amber{background:rgba(186,117,23,0.15);color:var(--amber)}
+.tag-blue{background:rgba(55,138,221,0.15);color:var(--blue)}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--bg3);border-radius:10px;padding:11px;text-align:center}
+.stat-val{font-size:20px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.prog-wrap{background:var(--bg3);border-radius:20px;height:5px;overflow:hidden;margin:3px 0 10px}
+.prog-bar{height:5px;border-radius:20px;transition:width 0.4s}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px}
+.day-box{border-radius:10px;padding:7px 2px;text-align:center;cursor:pointer;border:1px solid var(--border)}
+.day-box.today{border-color:var(--green);border-width:2px}
+.day-name{font-size:9px;color:var(--muted);margin-bottom:2px;text-transform:uppercase}
+.day-type{font-size:9px;font-weight:700;line-height:1.3}
+.d-push{background:rgba(29,158,117,0.1)}.d-push .day-type{color:var(--green)}
+.d-pull{background:rgba(127,119,221,0.1)}.d-pull .day-type{color:var(--purple)}
+.d-legs{background:rgba(216,90,48,0.1)}.d-legs .day-type{color:var(--coral)}
+.d-upper{background:rgba(55,138,221,0.1)}.d-upper .day-type{color:var(--blue)}
+.d-run{background:rgba(186,117,23,0.1)}.d-run .day-type{color:var(--amber)}
+.d-rest{background:rgba(136,136,136,0.08)}.d-rest .day-type{color:var(--muted)}
+.exo-block{background:var(--bg3);border-radius:10px;padding:11px;margin-bottom:8px}
+.exo-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px}
+.exo-note{font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5;font-style:italic}
+.exo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.exo-cell{background:var(--bg2);border-radius:7px;padding:6px 3px;text-align:center}
+.exo-val{font-size:12px;font-weight:700;color:var(--text)}
+.exo-lbl{font-size:9px;color:var(--muted);margin-top:1px}
+.warn{background:rgba(186,117,23,0.08);border:1px solid rgba(186,117,23,0.2);border-radius:10px;padding:11px;font-size:12px;color:var(--amber);line-height:1.6;margin-top:8px}
+.tip{background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:10px;padding:11px;font-size:12px;color:var(--green);line-height:1.6;margin-bottom:10px}
+.info{background:rgba(55,138,221,0.08);border:1px solid rgba(55,138,221,0.2);border-radius:10px;padding:11px;font-size:12px;color:var(--blue);line-height:1.6;margin-bottom:10px}
+li{font-size:12px;color:var(--muted);line-height:1.7;padding:1px 0;list-style:none}
+li::before{content:"—";margin-right:6px;color:var(--border)}
+.log-exo-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.log-exo-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer}
+.log-exo-name{font-size:13px;font-weight:600;color:var(--text)}
+.log-exo-best{font-size:11px;color:var(--green);font-weight:600}
+.log-exo-body{padding:0 14px 12px;display:none}
+.log-exo-body.open{display:block}
+.sets-grid{display:grid;grid-template-columns:28px 1fr 1fr 1fr 28px;gap:6px;align-items:center;margin-bottom:6px}
+.set-label{font-size:10px;color:var(--muted);text-align:center}
+.set-input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:7px 4px;text-align:center;width:100%}
+.set-input:focus{outline:none;border-color:var(--green)}
+.set-num{font-size:11px;color:var(--muted);font-weight:600;text-align:center}
+.del-set{background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0;text-align:center}
+.add-set-btn{font-size:12px;color:var(--green);background:rgba(29,158,117,0.1);border:none;border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:600;margin-top:4px;margin-right:6px}
+.save-btn{background:var(--green);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;margin-top:4px}
+.hist-title{font-size:11px;color:var(--muted);margin:10px 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.hist-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.hist-row:last-child{border-bottom:none}
+.hist-date{font-size:11px;color:var(--muted)}
+.hist-data{font-size:12px;color:var(--text);font-weight:500}
+.hist-pr{font-size:10px;color:var(--green);font-weight:700;margin-left:6px;background:rgba(29,158,117,0.15);padding:1px 5px;border-radius:10px}
+.phase-block{border-left:3px solid var(--amber);padding:10px 14px;margin-bottom:8px;background:var(--bg3);border-radius:0 10px 10px 0}
+.week-run-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.week-run-header{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;cursor:pointer}
+.week-run-body{display:none;padding:0 14px 12px}
+.week-run-body.open{display:block}
+.run-session{background:var(--bg3);border-radius:8px;padding:10px;margin-bottom:6px}
+.run-day{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:4px}
+.run-desc{font-size:12px;color:var(--text);line-height:1.5}
+.run-detail{font-size:11px;color:var(--muted);margin-top:3px}
+.countdown-trail{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.ct-box{background:var(--bg3);border-radius:10px;padding:11px;text-align:center}
+.ct-val{font-size:22px;font-weight:700;color:var(--amber)}
+.ct-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.run-log-row{display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);align-items:center}
+.run-log-row:last-child{border-bottom:none}
+.food-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.food-row:last-child{border-bottom:none}
+.food-name{font-size:12px;color:var(--text);flex:1}
+.food-prot{font-size:10px;padding:2px 7px;border-radius:20px;background:rgba(29,158,117,0.15);color:var(--green)}
+.remove-btn{color:var(--muted);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;background:none;border:none}
+.input-group{display:flex;gap:6px;margin-bottom:10px}
+.input-group input{background:var(--bg3);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:8px;min-width:0}
+.input-group input:focus{outline:none;border-color:var(--green)}
+.btn-green{background:var(--green);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:700;cursor:pointer;flex-shrink:0}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.quick-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;text-align:left}
+.quick-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px}
+.quick-macros{font-size:10px;color:var(--muted)}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-circle{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;margin-top:1px}
+.check-circle.done{background:var(--green);border-color:var(--green)}
+.check-tick{display:none;width:5px;height:9px;border:2px solid #fff;border-top:none;border-left:none;transform:rotate(45deg) translate(-1px,-1px)}
+.check-circle.done .check-tick{display:block}
+.check-label{font-size:13px;color:var(--text);line-height:1.5;flex:1}
+.check-label.done{color:var(--muted);text-decoration:line-through}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg2);border-top:1px solid var(--border);display:flex;padding:6px 0 22px}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;cursor:pointer;border:none;background:transparent;color:var(--muted)}
+.bnav-btn.on{color:var(--green)}
+.bnav-icon{font-size:19px;line-height:1}
+.bnav-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.03em}
+.sec-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 8px;font-weight:600}
+.ab-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:rgba(226,75,74,0.15);color:var(--red);margin-left:6px;vertical-align:middle}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="app-title">Mon Programme</div>
+    <div class="today-badge" id="today-badge">—</div>
+  </div>
+  <div class="header-sub" id="header-sub">Chargement...</div>
+</div>
+
+<div class="subnav" id="subnav" style="display:none"></div>
+<div id="content"></div>
+
+<div class="bottom-nav">
+  <button class="bnav-btn on" onclick="goTo('semaine')" id="bn-semaine"><div class="bnav-icon">📅</div><div class="bnav-label">Semaine</div></button>
+  <button class="bnav-btn" onclick="goTo('logbook')" id="bn-logbook"><div class="bnav-icon">💪</div><div class="bnav-label">Logbook</div></button>
+  <button class="bnav-btn" onclick="goTo('trail')" id="bn-trail"><div class="bnav-icon">🏔️</div><div class="bnav-label">Trail</div></button>
+  
+  <button class="bnav-btn" onclick="goTo('checklist')" id="bn-checklist"><div class="bnav-icon">✅</div><div class="bnav-label">Routine</div></button>
+  <button class="bnav-btn" onclick="goTo('regles')" id="bn-regles"><div class="bnav-icon">🔥</div><div class="bnav-label">Règles</div></button>
+</div>
+
+<script>
+// ─── PROGRAMME ──────────────────────────────────────────────────────────────
+// Abdos lestés 3x/sem : intégrés en FIN de Push, Pull, et Upper
+// Legs = mix force + mobilité trail
+
+const WEEK_PLAN=[
+  {name:'Lun',label:'Push + Abdos',cls:'d-push',type:'push'},
+  {name:'Mar',label:'Run fractionné',cls:'d-run',type:'run'},
+  {name:'Mer',label:'Pull + Abdos',cls:'d-pull',type:'pull'},
+  {name:'Jeu',label:'Legs trail',cls:'d-legs',type:'legs'},
+  {name:'Ven',label:'Upper + Abdos',cls:'d-upper',type:'upper'},
+  {name:'Sam',label:'Run long',cls:'d-run',type:'run_long'},
+  {name:'Dim',label:'Mobilité',cls:'d-rest',type:'rest'},
+];
+
+// Séances complètes avec abdos intégrés
+const SEANCES={
+  push:{
+    title:'Push + Abdos lestés — Lundi',tag:'tag-green',
+    sections:[
+      {label:'Pectoraux & épaules',color:'var(--green)',exos:[
+        {name:'Développé couché barre',note:'Exercice principal — noter les poids chaque semaine',sets:5,reps:'4–6',rpe:'RPE 8',repos:'2 min'},
+        {name:'Overhead press barre',note:'Épaules larges = silhouette en V. Priorité absolue.',sets:4,reps:'5–6',rpe:'RPE 8',repos:'2 min'},
+        {name:'Développé incliné haltères',note:'Pecs hauts — remplissage du t-shirt',sets:4,reps:'8–10',rpe:'RPE 7',repos:'90s'},
+        {name:'Élévations latérales',note:'Finisher épaules — 4 séries, brûlure maximale',sets:4,reps:'15–20',rpe:'RPE 7',repos:'45s'},
+      ]},
+      {label:'Abdos lestés — Bloc A',color:'var(--red)',exos:[
+        {name:'Crunch câble lesté',note:'Pas de crunch au sol — charge progressive pour le volume',sets:4,reps:'12–15',rpe:'RPE 8',repos:'60s'},
+        {name:'Relevé de jambes lesté (cheville)',note:'Iliopsoas + bas des abdos — leste les chevilles',sets:4,reps:'12',rpe:'RPE 7',repos:'60s'},
+        {name:'Obliques câble unilatéral',note:'Crée le relief latéral et l\'effet V — ne pas négliger',sets:3,reps:'15 / côté',rpe:'RPE 7',repos:'45s'},
+      ]},
+    ]
+  },
+  pull:{
+    title:'Pull + Abdos lestés — Mercredi',tag:'tag-purple',
+    sections:[
+      {label:'Dos & biceps',color:'var(--purple)',exos:[
+        {name:'Romanian deadlift',note:'Dos épais + ischios — base de la posture puissante',sets:4,reps:'4–5',rpe:'RPE 8',repos:'2 min'},
+        {name:'Rowing barre pronation',note:'Épaisseur du dos — mouvement numéro 1 pour le dos',sets:5,reps:'5–6',rpe:'RPE 8',repos:'2 min'},
+        {name:'Tractions lestées prise large',note:'Largeur du dos + silhouette en V — priorité dos',sets:4,reps:'5–7',rpe:'RPE 8',repos:'2 min'},
+        {name:'Face pulls câble',note:'Épaules arrières — prévention blessures et posture',sets:4,reps:'15',rpe:'RPE 7',repos:'45s'},
+        {name:'Shrugs lestés',note:'Trapèzes épais — port de tête puissant',sets:3,reps:'12',rpe:'RPE 7',repos:'45s'},
+      ]},
+      {label:'Abdos lestés — Bloc B',color:'var(--red)',exos:[
+        {name:'Ab wheel (roue abdos)',note:'Exercice roi pour les abdos en volume — commence sans charge',sets:4,reps:'8–12',rpe:'RPE 8',repos:'75s'},
+        {name:'Dragon flag négatif',note:'Niveau L-sit → dragon flag. Descente lente 4 secondes.',sets:3,reps:'5–8',rpe:'RPE 8',repos:'90s'},
+        {name:'Planche lestée (disque sur dos)',note:'Gainage profond — 5kg sur le dos minimum',sets:3,reps:'45 sec',rpe:'RPE 7',repos:'45s'},
+      ]},
+    ]
+  },
+  legs:{
+    title:'Legs Trail — Jeudi',tag:'tag-coral',
+    sections:[
+      {label:'Force jambes',color:'var(--coral)',exos:[
+        {name:'Squat barre',note:'Base de la puissance montée trail — charges lourdes',sets:5,reps:'4–6',rpe:'RPE 8',repos:'2 min'},
+        {name:'Romanian deadlift',note:'Ischios = moteur de la montée trail. Priorité.',sets:4,reps:'6–8',rpe:'RPE 7',repos:'90s'},
+        {name:'Fentes marchées lestées',note:'Unilatéral = stabilité sur terrain irrégulier trail',sets:3,reps:'12/jambe',rpe:'RPE 7',repos:'75s'},
+        {name:'Step-up lesté (boîte haute)',note:'Simule le mouvement de montée trail — clé',sets:3,reps:'12/jambe',rpe:'RPE 7',repos:'60s'},
+      ]},
+      {label:'Mobilité trail',color:'var(--amber)',exos:[
+        {name:'Hip flexor stretch (genou sol)',note:'3×60s / côté — les hip flexors limitent la foulée en montée',sets:3,reps:'60 sec',rpe:'—',repos:'30s'},
+        {name:'Pistol squat excentrique',note:'Descente lente 5s sur une jambe — genou fort en descente',sets:3,reps:'5/jambe',rpe:'RPE 6',repos:'60s'},
+        {name:'Mollets debout + étirement',note:'10 reps lestées puis 30s étirement — prévention crampes',sets:3,reps:'10+30s',rpe:'RPE 6',repos:'45s'},
+        {name:'Rotation hanches (cercles)',note:'2×10 cercles chaque sens — mobilité hanche trail',sets:2,reps:'10/sens',rpe:'—',repos:'20s'},
+      ]},
+    ]
+  },
+  upper:{
+    title:'Upper volume + Abdos lestés — Vendredi',tag:'tag-blue',
+    sections:[
+      {label:'Haut du corps — volume',color:'var(--blue)',exos:[
+        {name:'Développé incliné haltères',note:'Pecs hauts en hypertrophie — tempo lent 3-1-2',sets:4,reps:'8–10',rpe:'RPE 7',repos:'75s'},
+        {name:'Tirage poulie haute prise large',note:'Dos large — full étirement en haut',sets:4,reps:'10–12',rpe:'RPE 7',repos:'60s'},
+        {name:'Rowing haltère unilatéral',note:'Épaisseur dos + équilibre musculaire',sets:4,reps:'10–12',rpe:'RPE 7',repos:'60s'},
+        {name:'Élévations latérales superset face pulls',note:'Épaules 3D — enchaîner sans repos entre les deux',sets:4,reps:'15+15',rpe:'RPE 7',repos:'60s'},
+        {name:'Curl barre EZ',note:'Biceps — finisher, pas une priorité',sets:3,reps:'12',rpe:'RPE 6',repos:'45s'},
+      ]},
+      {label:'Abdos lestés — Bloc C',color:'var(--red)',exos:[
+        {name:'L-sit progressif (barres parallèles)',note:'De 15s → viser 30s+ avec poids aux chevilles',sets:4,reps:'max hold',rpe:'RPE 8',repos:'90s'},
+        {name:'Toes-to-bar lesté',note:'Suspension barre — jambes droites, leste les chevilles',sets:4,reps:'8–12',rpe:'RPE 8',repos:'75s'},
+        {name:'Crunch câble haute poulie',note:'Contraction maximale en bas — squeeze 1 seconde',sets:3,reps:'15',rpe:'RPE 7',repos:'45s'},
+        {name:'Russian twist lesté (disque)',note:'Obliques épaisseur — rotation explosive',sets:3,reps:'20 total',rpe:'RPE 7',repos:'45s'},
+      ]},
+    ]
+  },
+};
+
+const ALL_EXOS=[
+  'Développé couché barre','Overhead press barre','Développé incliné haltères','Élévations latérales',
+  'Crunch câble lesté','Relevé de jambes lesté','Obliques câble unilatéral',
+  'Romanian deadlift','Rowing barre pronation','Tractions lestées prise large','Face pulls câble','Shrugs lestés',
+  'Ab wheel','Dragon flag négatif','Planche lestée',
+  'Squat barre','Fentes marchées lestées','Step-up lesté','Mollets debout',
+  'Tirage poulie haute prise large','Rowing haltère unilatéral','Curl barre EZ',
+  'L-sit progressif','Toes-to-bar lesté','Russian twist lesté',
+];
+
+const TRAIL_PHASES=[
+  {title:'Phase 1 — Fondation aérobie',weeks:'Sem 1–6 · avr–mai',color:'var(--green)',desc:'Volume de base, habituer les jambes au D+. Allure très facile, tu dois pouvoir parler.',weekPlans:[
+    {w:1,vol:'30km / 600D+',sessions:[{day:'Mar',desc:'Fractionné 6×400m RPE9',detail:'Échauff 10min + 6×400m + retour calme'},{day:'Jeu',desc:'Trail 10km 300D+',detail:'Allure très facile, marche les côtes'},{day:'Sam',desc:'Longue 14km',detail:'Allure conversationnelle'}]},
+    {w:2,vol:'33km / 700D+',sessions:[{day:'Mar',desc:'Tempo 2×15min',detail:'RPE7 + échauff/retour'},{day:'Jeu',desc:'Trail 11km 350D+',detail:'Intègre marche rapide en montée'},{day:'Sam',desc:'Longue 16km',detail:'Mange et bois en courant'}]},
+    {w:3,vol:'36km / 800D+',sessions:[{day:'Mar',desc:'Fractionné 8×400m',detail:'RPE9'},{day:'Jeu',desc:'Trail 12km 400D+',detail:'Commence à trottiner les descentes'},{day:'Sam',desc:'Longue 18km',detail:'Ravitaillement toutes les 45min'}]},
+    {w:4,vol:'25km — Deload',sessions:[{day:'Mar',desc:'Footing 8km facile',detail:''},{day:'Sam',desc:'Trail léger 10km 200D+',detail:'Récupération active'}]},
+    {w:5,vol:'38km / 900D+',sessions:[{day:'Mar',desc:'Tempo 3×12min RPE7',detail:''},{day:'Jeu',desc:'Trail 13km 450D+',detail:'Travail montée/descente technique'},{day:'Sam',desc:'Longue 20km',detail:'Première vraie longue — mange avant 60min'}]},
+    {w:6,vol:'40km / 1000D+',sessions:[{day:'Mar',desc:'Fractionné 10×400m',detail:'RPE9'},{day:'Jeu',desc:'Trail 14km 500D+',detail:'Tester chaussures trail et sac'},{day:'Sam',desc:'Longue 22km',detail:'Objectif : finir frais'}]},
+  ]},
+  {title:'Phase 2 — Construction spécifique',weeks:'Sem 7–14 · juin–juil',color:'var(--amber)',desc:'Volume long et D+ progressif. Sorties enchaînées le week-end. Simulation nutrition course.',weekPlans:[
+    {w:7,vol:'44km / 1200D+',sessions:[{day:'Mar',desc:'Côtes 8×1min RPE9',detail:'Montée puissante, descente trot'},{day:'Jeu',desc:'Trail 15km 600D+',detail:'Technique descente — ne pas freiner'},{day:'Sam',desc:'Longue 24km',detail:'Marcher les côtes >10%'}]},
+    {w:8,vol:'30km — Deload',sessions:[{day:'Mar',desc:'Footing 10km',detail:''},{day:'Sam',desc:'Trail 12km 300D+',detail:'Plaisir uniquement'}]},
+    {w:9,vol:'48km / 1400D+',sessions:[{day:'Mar',desc:'Tempo long 25min',detail:'RPE7 soutenu'},{day:'Jeu',desc:'Trail 16km 700D+',detail:'Simulation profil trail'},{day:'Sam',desc:'Longue 26km',detail:'Gel toutes les 40min, 500ml/h'}]},
+    {w:10,vol:'50km / 1500D+',sessions:[{day:'Mar',desc:'Côtes 10×1min RPE9',detail:''},{day:'Jeu',desc:'Trail 17km 750D+',detail:'Sac hydratation complet'},{day:'Sam',desc:'Longue 28km',detail:'Marche stratégique en montée'}]},
+    {w:11,vol:'35km — Deload',sessions:[{day:'Mar',desc:'Footing 10km',detail:''},{day:'Sam',desc:'Trail 15km 400D+',detail:''}]},
+    {w:12,vol:'54km / 1800D+',sessions:[{day:'Mar',desc:'Tempo 2×20min RPE7',detail:''},{day:'Jeu',desc:'Trail 18km 900D+',detail:'Maximum D+ accessible'},{day:'Sam',desc:'Longue 30km',detail:'PREMIÈRE LONGUE DÉCISIVE — simulation complète'}]},
+    {w:13,vol:'56km / 2000D+',sessions:[{day:'Mar',desc:'Côtes 12×1min RPE9',detail:''},{day:'Jeu',desc:'Trail 18km 1000D+',detail:'Descente technique prioritaire'},{day:'Ven',desc:'Récup 8km',detail:'J+1 jambes fatiguées = entraînement trail'},{day:'Sam',desc:'Longue 28km',detail:'Allure trail, pas de forcing'}]},
+    {w:14,vol:'30km — Deload',sessions:[{day:'Mar',desc:'Footing 10km',detail:''},{day:'Sam',desc:'Trail 12km 300D+',detail:''}]},
+  ]},
+  {title:'Phase 3 — Pic de forme',weeks:'Sem 15–22 · août–sep',color:'var(--coral)',desc:'Volume maximum. Week-ends dos-à-dos. Simulation de course. Peak semaine 20.',weekPlans:[
+    {w:15,vol:'58km / 2200D+',sessions:[{day:'Mar',desc:'Tempo 30min RPE7',detail:''},{day:'Jeu',desc:'Trail 20km 1000D+',detail:'Allure trail objectif'},{day:'Sam',desc:'Longue 32km',detail:'Dos-à-dos : dim 12km après'},{day:'Dim',desc:'Récup 12km',detail:'Très facile — jambes lourdes = normal'}]},
+    {w:16,vol:'35km — Deload',sessions:[{day:'Mar',desc:'Footing 12km',detail:''},{day:'Sam',desc:'Trail 14km 400D+',detail:''}]},
+    {w:17,vol:'62km / 2500D+',sessions:[{day:'Mar',desc:'Côtes longues 6×3min RPE8',detail:''},{day:'Jeu',desc:'Trail 20km 1200D+',detail:'Max D+'},{day:'Sam',desc:'Longue 34km',detail:'Tester tous les gels'},{day:'Dim',desc:'Récup 14km',detail:'Marche/trot'}]},
+    {w:18,vol:'64km / 2800D+',sessions:[{day:'Mar',desc:'Tempo 35min',detail:''},{day:'Jeu',desc:'Trail 22km 1400D+',detail:''},{day:'Sam',desc:'Longue 36km',detail:'Partir lentement, finir fort'},{day:'Dim',desc:'Récup 14km',detail:''}]},
+    {w:19,vol:'40km — Deload',sessions:[{day:'Mar',desc:'Footing 12km',detail:''},{day:'Sam',desc:'Trail 18km 500D+',detail:''}]},
+    {w:20,vol:'68km / 3000D+ — PEAK',sessions:[{day:'Mar',desc:'Côtes 15×1min RPE9',detail:'Séance clé'},{day:'Jeu',desc:'Trail 22km 1500D+',detail:'Profil le plus proche de la course'},{day:'Sam',desc:'LONGUE 38km',detail:'LA SORTIE CLÉ — simulation complète ravito'},{day:'Dim',desc:'Récup 16km',detail:'Validé si tu finis sans forcer'}]},
+    {w:21,vol:'60km / 2500D+',sessions:[{day:'Mar',desc:'Tempo 25min race pace',detail:''},{day:'Jeu',desc:'Trail 18km 1000D+',detail:''},{day:'Sam',desc:'Longue 32km',detail:''},{day:'Dim',desc:'Récup 12km',detail:''}]},
+    {w:22,vol:'35km — Deload',sessions:[{day:'Mar',desc:'Footing 12km',detail:''},{day:'Sam',desc:'Trail 14km 400D+',detail:''}]},
+  ]},
+  {title:'Phase 4 — Affûtage',weeks:'Sem 23–28 · oct–7 nov',color:'var(--purple)',desc:'Réduction du volume. Les jambes se rechargent. Ne rien tester de nouveau. La course se gagne ici.',weekPlans:[
+    {w:23,vol:'50km / 1800D+',sessions:[{day:'Mar',desc:'Tempo 20min',detail:''},{day:'Jeu',desc:'Trail 16km 800D+',detail:''},{day:'Sam',desc:'Longue 26km',detail:''}]},
+    {w:24,vol:'42km / 1400D+',sessions:[{day:'Mar',desc:'Fractionné 6×400m',detail:'Garder la vitesse'},{day:'Jeu',desc:'Trail 14km 600D+',detail:''},{day:'Sam',desc:'22km allure race',detail:''}]},
+    {w:25,vol:'35km / 1000D+',sessions:[{day:'Mar',desc:'Tempo 15min',detail:''},{day:'Jeu',desc:'Trail 12km 400D+',detail:''},{day:'Sam',desc:'18km',detail:'Préparer mentalement'}]},
+    {w:26,vol:'28km / 800D+',sessions:[{day:'Mar',desc:'Fractionné 4×400m',detail:'Légèreté'},{day:'Jeu',desc:'Trail 10km 300D+',detail:''},{day:'Sam',desc:'14km',detail:'Tout doit sembler facile'}]},
+    {w:27,vol:'20km — J-1 semaine',sessions:[{day:'Mar',desc:'Footing 8km très facile',detail:''},{day:'Jeu',desc:'Trail léger 8km',detail:''},{day:'Sam',desc:'Footing 4km',detail:'J-2'}]},
+    {w:28,vol:'RACE WEEK',sessions:[{day:'Lun–Ven',desc:'Repos, glucides, sac prêt',detail:'Dormir tôt vendredi'},{day:'Dim 7 nov',desc:'ULTRATRAIL 55KM',detail:'Tu as fait le travail. Profite.'}]},
+  ]},
+];
+
+const QUICK_MEALS=[
+  {name:'Petit-déj muscu',kcal:520,prot:38,desc:'Avoine + œufs + banane'},
+  {name:'Déj poulet riz',kcal:650,prot:52,desc:'200g poulet + 200g riz'},
+  {name:'Snack post-séance',kcal:320,prot:30,desc:'Whey + fruit + amandes'},
+  {name:'Dîner saumon',kcal:580,prot:44,desc:'Saumon + patate douce'},
+];
+
+const CHECKLIST_ITEMS=[
+  'Prière',
+  'Réveil fixe — pas de snooze',
+  'Soins visage : nettoyant + SPF',
+  'Pas d\'écran 30 min après réveil',
+  'Sport / run du jour',
+  'Tracker la nourriture',
+  'Repas protéiné — pas de saut',
+  'Réseaux max 30 min',
+  'No porn — zéro exception',
+  'Magnésium bisglycinate le soir',
+  '3 lignes dans un carnet',
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+function ls(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch{}}
+
+let S={
+  page:'semaine',seanceType:'push',trailTab:'plan',
+  logOpen:{},trailOpen:{},
+  foods:ls('foods3',[]),checks:ls('checks3',{}),lastReset:ls('lastReset',''),
+  logbook:ls('logbook3',{}),runLog:ls('runLog3',[]),
+};
+
+function save(){ss('foods3',S.foods);ss('checks3',S.checks);ss('logbook3',S.logbook);ss('runLog3',S.runLog);ss('lastReset',S.lastReset);}
+function todayKey(){return new Date().toISOString().slice(0,10);}
+function fmtDate(d){return new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});}
+
+// ─── NAV ────────────────────────────────────────────────────────────────────
+function goTo(p){
+  S.page=p;
+  ['semaine','logbook','trail','checklist','regles'].forEach(x=>{const el=document.getElementById('bn-'+x);if(el)el.classList.toggle('on',x===p);});
+  render();
+}
+
+function render(){
+  const sub=document.getElementById('subnav'),c=document.getElementById('content');
+  sub.style.display='none';sub.innerHTML='';
+  if(S.page==='semaine')c.innerHTML=renderSemaine();
+  else if(S.page==='logbook')renderLogbook(c,sub);
+  else if(S.page==='trail')renderTrail(c,sub);
+  
+  else if(S.page==='checklist')c.innerHTML=renderChecklist();
+  else if(S.page==='regles')c.innerHTML=renderRegles();
+}
+
+// ─── SEMAINE ────────────────────────────────────────────────────────────────
+function countdownTrail(){
+  const diff=new Date('2026-11-07')-new Date();
+  const d=Math.max(0,Math.ceil(diff/86400000));
+  return{w:Math.floor(d/7),d};
+}
+
+function renderSemaine(){
+  const di=new Date().getDay(),ti=di===0?6:di-1;
+  const boxes=WEEK_PLAN.map((d,i)=>`
+    <div class="day-box ${d.cls}${i===ti?' today':''}" onclick="goSeance('${d.type}')">
+      <div class="day-name">${d.name}</div>
+      <div class="day-type">${d.label}</div>
+    </div>`).join('');
+  const today=WEEK_PLAN[ti];
+  const cd=countdownTrail();
+  const hasAbs=['push','pull','upper'].includes(today.type);
+  return`<div class="page on">
+    <div class="countdown-trail">
+      <div class="ct-box"><div class="ct-val">${cd.w}</div><div class="ct-lbl">semaines</div></div>
+      <div class="ct-box"><div class="ct-val">${cd.d}</div><div class="ct-lbl">jours</div></div>
+      <div class="ct-box"><div class="ct-val">55</div><div class="ct-lbl">km race</div></div>
+      <div class="ct-box" style="background:rgba(186,117,23,0.1)"><div class="ct-val" style="font-size:13px;color:var(--amber)">7 Nov</div><div class="ct-lbl">objectif</div></div>
+    </div>
+    <div class="week-grid">${boxes}</div>
+    <div class="card">
+      <span class="tag tag-green">Aujourd'hui — ${today.label}</span>
+      ${hasAbs?'<span class="ab-badge">Abdos inclus</span>':''}
+      <div class="card-title" style="margin-bottom:6px;margin-top:8px">Focus du jour</div>
+      ${today.type==='push'?'<ul><li>Push : développé couché + overhead press en priorité</li><li>Finir par les 3 exercices abdos lestés</li><li>Crunch câble → relevé de jambes → obliques</li></ul>':''}
+      ${today.type==='pull'?'<ul><li>Pull : rowing barre + tractions lestées en priorité</li><li>Finir par abdos : ab wheel → dragon flag → planche lestée</li><li>Dragon flag : descente lente 4 secondes</li></ul>':''}
+      ${today.type==='legs'?'<ul><li>Force : squat + Romanian DL + step-up lestés</li><li>Mobilité trail : hip flexor + pistol squat excentrique</li><li>Ne pas sauter la partie mobilité — clé pour le trail</li></ul>':''}
+      ${today.type==='upper'?'<ul><li>Upper volume : charges moyennes, reps hautes</li><li>Abdos : L-sit progressif → toes-to-bar → russian twist</li><li>L-sit : viser +5s par rapport à la semaine dernière</li></ul>':''}
+      ${today.type==='run'?'<ul><li>Fractionné : 8×400m RPE9, récup 90s</li><li>Échauffement 10min obligatoire</li><li>Note la distance dans le journal trail</li></ul>':''}
+      ${today.type==='run_long'?'<ul><li>Sortie longue — voir plan trail pour la semaine en cours</li><li>Ravitaillement toutes les 40–45min</li><li>Allure conversationnelle — pas de forcing</li></ul>':''}
+      ${today.type==='rest'?'<ul><li>Marche 40min minimum</li><li>10–15min mobilité hanches et chevilles</li><li>Coucher tôt + magnésium</li></ul>':''}
+    </div>
+  </div>`;
+}
+
+function goSeance(type){
+  if(['push','pull','legs','upper'].includes(type)){
+    S.page='logbook';S.seanceType=type;
+    ['semaine','logbook','trail','checklist','regles'].forEach(x=>{const el=document.getElementById('bn-'+x);if(el)el.classList.toggle('on',x==='logbook');});
+  }
+  render();
+}
+
+// ─── LOGBOOK ────────────────────────────────────────────────────────────────
+function renderLogbook(c,sub){
+  sub.style.display='flex';
+  const types=['push','pull','legs','upper'];
+  const labels={push:'Push+Abs',pull:'Pull+Abs',legs:'Legs Trail',upper:'Upper+Abs'};
+  sub.innerHTML=types.map(t=>`<button class="snav-btn ${t===S.seanceType?'on':''}" onclick="switchSeance('${t}')">${labels[t]}</button>`).join('');
+  const s=SEANCES[S.seanceType];
+  let html='';
+  s.sections.forEach(sec=>{
+    html+=`<div style="font-size:11px;font-weight:700;color:${sec.color};text-transform:uppercase;letter-spacing:0.05em;margin:14px 0 8px;padding-left:2px">${sec.label}</div>`;
+    sec.exos.forEach(exo=>{
+      const log=S.logbook[exo.name]||{sessions:[]};
+      const bestKg=log.sessions.length?Math.max(...log.sessions.flatMap(s=>s.sets.map(x=>parseFloat(x.kg)||0))):0;
+      const isOpen=S.logOpen[exo.name];
+      const lastSess=log.sessions[log.sessions.length-1];
+      const todaySets=lastSess&&lastSess.date===todayKey()?lastSess.sets:[{kg:'',reps:'',note:''}];
+      const setsHtml=todaySets.map((set,i)=>`
+        <div class="sets-grid">
+          <div class="set-num">S${i+1}</div>
+          <input class="set-input" type="number" step="0.5" placeholder="kg" value="${set.kg}" onchange="updateSet('${exo.name}',${i},'kg',this.value)">
+          <input class="set-input" type="number" placeholder="reps" value="${set.reps}" onchange="updateSet('${exo.name}',${i},'reps',this.value)">
+          <input class="set-input" type="text" placeholder="note" value="${set.note||''}" onchange="updateSet('${exo.name}',${i},'note',this.value)">
+          <button class="del-set" onclick="delSet('${exo.name}',${i})">×</button>
+        </div>`).join('');
+      const histHtml=log.sessions.slice(-4).reverse().map(sess=>{
+        const maxKg=Math.max(...sess.sets.map(x=>parseFloat(x.kg)||0));
+        const totReps=sess.sets.reduce((a,x)=>a+(parseInt(x.reps)||0),0);
+        const isPR=maxKg>0&&maxKg===bestKg;
+        return`<div class="hist-row"><span class="hist-date">${fmtDate(sess.date)}</span><span class="hist-data">${maxKg||'—'}kg · ${totReps}reps${isPR?'<span class="hist-pr">PR</span>':''}</span></div>`;
+      }).join('');
+      html+=`<div class="log-exo-card">
+        <div class="log-exo-header" onclick="toggleLog('${exo.name}')">
+          <div>
+            <div class="log-exo-name">${exo.name}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">${exo.sets} séries × ${exo.reps} · ${exo.rpe} · repos ${exo.repos}</div>
+          </div>
+          <div style="text-align:right">
+            ${bestKg>0?`<div class="log-exo-best">Best ${bestKg}kg</div>`:'<div style="font-size:10px;color:var(--muted)">Pas encore loggé</div>'}
+            <div style="font-size:16px;color:var(--muted);margin-top:3px">${isOpen?'▲':'▼'}</div>
+          </div>
+        </div>
+        <div class="log-exo-body ${isOpen?'open':''}">
+          ${exo.note?`<div style="font-size:11px;color:var(--muted);margin-bottom:10px;font-style:italic;line-height:1.5">${exo.note}</div>`:''}
+          <div class="sets-grid" style="margin-bottom:2px">
+            <div></div><div class="set-label">kg</div><div class="set-label">reps</div><div class="set-label">note</div><div></div>
+          </div>
+          ${setsHtml}
+          <div style="margin-top:8px">
+            <button class="add-set-btn" onclick="addSet('${exo.name}')">+ Série</button>
+            <button class="save-btn" onclick="saveSession('${exo.name}',this)">Sauvegarder</button>
+          </div>
+          ${log.sessions.length?`<div class="hist-title">Historique</div>${histHtml}`:''}
+        </div>
+      </div>`;
+    });
+  });
+  c.innerHTML=`<div class="page on"><div class="tip">Abdos 3x/sem avec charges = volume réel. Progression comme pour les pecs : +charge dès que tu passes la fourchette haute.</div>${html}</div>`;
+}
+
+function switchSeance(t){S.seanceType=t;render();}
+function toggleLog(exo){S.logOpen[exo]=!S.logOpen[exo];render();}
+
+function getTodaySets(exo){
+  if(!S.logbook[exo])S.logbook[exo]={sessions:[]};
+  const log=S.logbook[exo];
+  const last=log.sessions[log.sessions.length-1];
+  if(last&&last.date===todayKey())return last.sets;
+  const sets=[{kg:'',reps:'',note:''}];
+  log.sessions.push({date:todayKey(),sets});
+  return sets;
+}
+
+function updateSet(exo,i,f,v){const s=getTodaySets(exo);if(!s[i])s[i]={kg:'',reps:'',note:''};s[i][f]=v;save();}
+function addSet(exo){getTodaySets(exo).push({kg:'',reps:'',note:''});save();render();}
+function delSet(exo,i){const s=getTodaySets(exo);if(s.length>1){s.splice(i,1);save();render();}}
+function saveSession(exo,btn){
+  const s=getTodaySets(exo);
+  if(!s.some(x=>x.kg||x.reps)){alert('Ajoute au moins une charge ou des reps');return;}
+  save();
+  const orig=btn.textContent;btn.textContent='✓ Sauvegardé !';btn.style.background='#085041';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background='var(--green)';},2000);
+}
+
+// ─── TRAIL ──────────────────────────────────────────────────────────────────
+function renderTrail(c,sub){
+  sub.style.display='flex';
+  sub.innerHTML=['plan','runlog','conseils'].map(t=>`<button class="snav-btn ${t===S.trailTab?'on':''}" onclick="switchTrail('${t}')">${t==='plan'?'Plan 28 sem':t==='runlog'?'Journal runs':'Conseils'}</button>`).join('');
+  if(S.trailTab==='plan')c.innerHTML=renderTrailPlan();
+  else if(S.trailTab==='runlog')c.innerHTML=renderRunLog();
+  else c.innerHTML=renderTrailConseils();
+}
+function switchTrail(t){S.trailTab=t;render();}
+function toggleTrail(k){S.trailOpen[k]=!S.trailOpen[k];render();}
+
+function renderTrailPlan(){
+  const cd=countdownTrail();
+  const phases=TRAIL_PHASES.map(ph=>`
+    <div class="phase-block" style="border-left-color:${ph.color}">
+      <div style="font-size:13px;font-weight:700;color:var(--text)">${ph.title}</div>
+      <div style="font-size:11px;color:${ph.color};margin:3px 0 6px;font-weight:600">${ph.weeks}</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">${ph.desc}</div>
+    </div>
+    ${ph.weekPlans.map(wp=>{
+      const isOpen=S.trailOpen['w'+wp.w];
+      return`<div class="week-run-card">
+        <div class="week-run-header" onclick="toggleTrail('w${wp.w}')">
+          <div style="font-size:13px;font-weight:700;color:var(--text)">Semaine ${wp.w}</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="font-size:12px;color:var(--amber);font-weight:600">${wp.vol}</div>
+            <div style="font-size:16px;color:var(--muted)">${isOpen?'▲':'▼'}</div>
+          </div>
+        </div>
+        <div class="week-run-body ${isOpen?'open':''}">
+          ${wp.sessions.map(s=>`<div class="run-session"><div class="run-day">${s.day}</div><div class="run-desc">${s.desc}</div>${s.detail?`<div class="run-detail">${s.detail}</div>`:''}</div>`).join('')}
+        </div>
+      </div>`;
+    }).join('')}`).join('');
+  return`<div class="page on">
+    <div class="countdown-trail">
+      <div class="ct-box"><div class="ct-val">${cd.w}</div><div class="ct-lbl">semaines</div></div>
+      <div class="ct-box"><div class="ct-val">${cd.d}</div><div class="ct-lbl">jours</div></div>
+      <div class="ct-box"><div class="ct-val">55</div><div class="ct-lbl">km</div></div>
+      <div class="ct-box" style="background:rgba(186,117,23,0.1)"><div class="ct-val" style="font-size:13px;color:var(--amber)">7 Nov</div><div class="ct-lbl">race day</div></div>
+    </div>${phases}</div>`;
+}
+
+function renderRunLog(){
+  const logs=S.runLog;
+  const totKm=logs.reduce((a,r)=>a+(parseFloat(r.km)||0),0);
+  return`<div class="page on">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-val" style="color:var(--amber)">${totKm.toFixed(0)}</div><div class="stat-lbl">km totaux</div></div>
+      <div class="stat"><div class="stat-val">${logs.length}</div><div class="stat-lbl">sorties</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--green)">${logs.length?(totKm/logs.length).toFixed(1):'0'}</div><div class="stat-lbl">moy km</div></div>
+    </div>
+    <div class="sec-lbl">Ajouter une sortie</div>
+    <div class="input-group">
+      <input type="number" id="r-km" placeholder="km" step="0.1" style="width:65px">
+      <input type="number" id="r-dp" placeholder="D+" style="width:60px">
+      <input type="text" id="r-type" placeholder="Type (trail, longue...)" style="flex:1">
+      <button class="btn-green" onclick="addRun()">+</button>
+    </div>
+    <div class="card" style="padding:10px">
+      ${!logs.length?'<div style="font-size:13px;color:var(--muted);padding:6px 0">Aucune sortie enregistrée</div>':
+        logs.slice().reverse().map(r=>`<div class="run-log-row">
+          <div style="font-size:11px;color:var(--muted);width:60px;flex-shrink:0">${fmtDate(r.date)}</div>
+          <div style="flex:1;font-size:12px;color:var(--text)">${r.type}${r.dp?' · '+r.dp+'D+':''}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber)">${r.km}km</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function addRun(){
+  const km=document.getElementById('r-km').value;
+  const dp=document.getElementById('r-dp').value;
+  const type=document.getElementById('r-type').value.trim();
+  if(!km)return;
+  S.runLog.push({date:todayKey(),km:parseFloat(km),dp:dp?parseInt(dp):0,type:type||'Run'});
+  save();render();
+}
+
+function renderTrailConseils(){
+  return`<div class="page on">
+    <div class="card"><span class="tag tag-amber">Nutrition trail</span><div class="card-title">Manger en courant</div><ul><li>1 gel ou 30g glucides toutes les 40–45min dès 60min d'effort</li><li>500ml eau/heure minimum</li><li>Tout tester avant la course — aucune nouveauté le jour J</li><li>Salé obligatoire sur ultra : gâteau de riz, chips, bouillon</li><li>Sur 55km : 8–10 gels + nourriture solide aux ravitos</li></ul></div>
+    <div class="card"><span class="tag tag-purple">Stratégie course</span><div class="card-title">Comment terminer et profiter</div><ul><li>Partir TROP lentement les 10 premiers km</li><li>Marcher toutes les côtes >8% — optimal, pas une faiblesse</li><li>Découper mentalement : 20 + 20 + 15km</li><li>Focus sur le prochain ravito, pas sur le total</li><li>Si tu souffres : marcher 5min en mangeant = récupération</li></ul></div>
+    <div class="card"><span class="tag tag-green">Matériel</span><div class="card-title">Tout tester à l'entraînement</div><ul><li>Chaussures trail avec grip — testées en longue sortie</li><li>Sac hydratation 8–12L avec flasques souples</li><li>Veste imperméable légère (souvent obligatoire)</li><li>Bâtons de marche — économise 15–20% d'énergie</li><li>Lampe frontale + couverture de survie + sifflet</li><li>Chaussettes anti-ampoules : Drymax ou Injinji</li></ul></div>
+  </div>`;
+}
+
+// ─── NUTRITION ──────────────────────────────────────────────────────────────
+function renderNutrition(){
+  const t={kcal:2750,prot:130};
+  const totK=S.foods.reduce((a,f)=>a+(parseInt(f.kcal)||0),0);
+  const totP=S.foods.reduce((a,f)=>a+(parseInt(f.prot)||0),0);
+  const kp=Math.min(100,Math.round(totK/t.kcal*100));
+  const pp=Math.min(100,Math.round(totP/t.prot*100));
+  return`<div class="page on">
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-val" style="color:${kp>100?'var(--red)':'var(--green)'}">${totK}</div><div class="stat-lbl">kcal / ${t.kcal}</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--purple)">${totP}g</div><div class="stat-lbl">prot / ${t.prot}g</div></div>
+      <div class="stat"><div class="stat-val" style="color:var(--amber)">${Math.max(0,t.kcal-totK)}</div><div class="stat-lbl">restantes</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Calories <span style="float:right">${kp}%</span></div>
+    <div class="prog-wrap"><div class="prog-bar" style="width:${kp}%;background:${kp>100?'var(--red)':'var(--green)'}"></div></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Protéines <span style="float:right">${pp}%</span></div>
+    <div class="prog-wrap" style="margin-bottom:14px"><div class="prog-bar" style="width:${pp}%;background:var(--purple)"></div></div>
+    <div class="sec-lbl">Ajouter</div>
+    <div class="input-group">
+      <input type="text" id="fn" placeholder="Aliment..." style="flex:2">
+      <input type="number" id="fk" placeholder="kcal" style="width:65px">
+      <input type="number" id="fp" placeholder="prot" style="width:60px">
+      <button class="btn-green" onclick="addFood()">+</button>
+    </div>
+    <div class="sec-lbl">Repas rapides</div>
+    <div class="quick-grid" style="margin-bottom:14px">
+      ${QUICK_MEALS.map((m,i)=>`<div class="quick-btn" onclick="addQuick(${i})"><div class="quick-name">${m.name}</div><div class="quick-macros">${m.kcal}kcal · ${m.prot}g prot</div><div class="quick-macros" style="margin-top:2px">${m.desc}</div></div>`).join('')}
+    </div>
+    <div class="sec-lbl">Journal du jour</div>
+    <div class="card" style="padding:10px">
+      ${!S.foods.length?'<div style="font-size:13px;color:var(--muted);padding:6px 0">Aucun aliment</div>':
+        S.foods.map((f,i)=>`<div class="food-row"><div class="food-name">${f.name}</div><span class="food-prot">${f.prot}g</span><span style="font-size:11px;color:var(--muted)">${f.kcal}kcal</span><button class="remove-btn" onclick="removeFood(${i})">×</button></div>`).join('')}
+    </div>
+    <button onclick="clearFoods()" style="font-size:12px;color:var(--muted);background:none;border:none;cursor:pointer;margin-top:4px">Effacer le journal</button>
+  </div>`;
+}
+
+function addFood(){const n=document.getElementById('fn').value.trim(),k=parseInt(document.getElementById('fk').value)||0,p=parseInt(document.getElementById('fp').value)||0;if(!n)return;S.foods.push({name:n,kcal:k,prot:p});save();render();}
+function addQuick(i){S.foods.push({...QUICK_MEALS[i]});save();render();}
+function removeFood(i){S.foods.splice(i,1);save();render();}
+function clearFoods(){S.foods=[];save();render();}
+
+// ─── CHECKLIST ──────────────────────────────────────────────────────────────
+function renderChecklist(){
+  const key=todayKey(),done=S.checks[key]||{};
+  const count=Object.values(done).filter(Boolean).length;
+  const pct=Math.round(count/CHECKLIST_ITEMS.length*100);
+  // Historique des 7 derniers jours
+  const histDays=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const k=d.toISOString().slice(0,10);
+    const dayDone=S.checks[k]||{};
+    const dayCount=Object.values(dayDone).filter(Boolean).length;
+    const dayPct=Math.round(dayCount/CHECKLIST_ITEMS.length*100);
+    const dayName=['D','L','M','M','J','V','S'][d.getDay()];
+    histDays.push({k,dayName,dayCount,dayPct,isToday:i===0});
+  }
+  const histHtml=histDays.map(d=>`
+    <div style="text-align:center;flex:1">
+      <div style="font-size:9px;color:var(--muted);margin-bottom:4px">${d.dayName}</div>
+      <div style="width:32px;height:32px;border-radius:50%;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
+        background:${d.dayPct===100?'var(--green)':d.dayPct>50?'rgba(29,158,117,0.3)':d.dayPct>0?'rgba(186,117,23,0.3)':'var(--bg3)'};
+        color:${d.dayPct>0?'var(--text)':'var(--muted)'};
+        border:${d.isToday?'2px solid var(--green)':'2px solid transparent'}"
+      >${d.dayPct}%</div>
+    </div>`).join('');
+  return`<div class="page on">
+    <div class="stat-grid" style="grid-template-columns:1fr 1fr;margin-bottom:12px">
+      <div class="stat"><div class="stat-val" style="color:var(--green)">${count}/${CHECKLIST_ITEMS.length}</div><div class="stat-lbl">aujourd'hui</div></div>
+      <div class="stat"><div class="stat-val">${pct}%</div><div class="stat-lbl">complété</div></div>
+    </div>
+    <div class="prog-wrap" style="margin-bottom:14px"><div class="prog-bar" style="width:${pct}%;background:var(--green)"></div></div>
+    <div style="display:flex;gap:4px;margin-bottom:16px">${histHtml}</div>
+    <div class="card" style="padding:10px 14px">
+      ${CHECKLIST_ITEMS.map((item,i)=>`
+        <div class="check-item" onclick="toggleCheck(${i})">
+          <div class="check-circle ${done[i]?'done':''}"><div class="check-tick"></div></div>
+          <div class="check-label ${done[i]?'done':''}">${item}</div>
+        </div>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-top:8px">Réinitialisation automatique à 7h chaque matin</div>
+  </div>`;
+}
+
+function toggleCheck(i){const k=todayKey();if(!S.checks[k])S.checks[k]={};S.checks[k][i]=!S.checks[k][i];save();render();}
+function resetChecks(){S.checks[todayKey()]={};save();render();}
+
+function checkAutoReset(){
+  const now=new Date();
+  const lastReset=S.lastReset||'';
+  const todayStr=todayKey();
+  // Reset à 7h si nouveau jour
+  if(now.getHours()>=7 && lastReset!==todayStr){
+    S.lastReset=todayStr;
+    // Sauvegarder le jour précédent avant reset (déjà sauvegardé dans S.checks)
+    save();
+  }
+  // Programmer le prochain check
+  const msUntilNext = 60000; // check chaque minute
+  setTimeout(checkAutoReset, msUntilNext);
+}
+
+// ─── RÈGLES
+const MY_RULES = [
+  "La clarté vient après l'action, jamais avant",
+  "La peur ne dit pas d'arrêter. Elle dit d'y aller.",
+  "Tu n'as besoin de la permission de personne pour devenir qui tu veux être",
+  "La vie que tu veux est de l'autre côté de la confiance en toi. C'est flippant, je sais. Relis le #2.",
+  "Trop réfléchir te bloque plus que l'échec ne l'a jamais fait. Je te le promets.",
+  "Personne n'a tout compris. Ils ont juste commencé quand même. On est tous un peu perdus, même ceux qui ont l'air de savoir où ils vont.",
+  "La confiance se construit en faisant ce qui te fait le plus peur",
+  "La régularité compte plus que la motivation",
+  "La plupart des choses se règlent quand tu arrêtes d'hésiter",
+  "Tu deviens la personne que tu veux être en agissant comme elle d'abord, pas après"
+];
+
+function renderRegles(){
+  const today = new Date();
+  const idx = today.getDate() % MY_RULES.length;
+  const rule = MY_RULES[idx];
+  const rulesHtml = MY_RULES.map((r, i) => `
+    <div style="background:var(--bg3);border-radius:12px;padding:14px;margin-bottom:8px;border-left:3px solid ${i===idx?'var(--green)':'var(--border)'}">
+      <div style="font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600">${i+1}</div>
+      <div style="font-size:14px;color:${i===idx?'var(--text)':'var(--muted)'};line-height:1.6;font-weight:${i===idx?'600':'400'}">${r}</div>
+    </div>`).join('');
+  return`<div class="page on">
+    <div style="background:rgba(29,158,117,0.08);border:1px solid rgba(29,158,117,0.2);border-radius:12px;padding:16px;margin-bottom:16px">
+      <div style="font-size:10px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Règle du jour</div>
+      <div style="font-size:16px;color:var(--text);line-height:1.6;font-weight:600">${rule}</div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px;font-weight:600">Toutes les règles</div>
+    ${rulesHtml}
+  </div>`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+function initHeader(){
+  const d=new Date(),names=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  const di=d.getDay(),ti=di===0?6:di-1;
+  const hasAbs=['push','pull','upper'].includes(WEEK_PLAN[ti].type);
+  document.getElementById('today-badge').textContent=names[di];
+  document.getElementById('header-sub').textContent=WEEK_PLAN[ti].label+(hasAbs?' · Abdos inclus':'')+' · J-'+countdownTrail().d+' trail';
+}
+
+initHeader();render();checkAutoReset();
+</script>
+</body>
+</html>
